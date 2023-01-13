@@ -1,4 +1,4 @@
-import { ChangeEvent, ReactElement } from "react"
+import { ChangeEvent, ReactElement, memo } from "react"
 import { CartItemType } from "../context/CartProvider"
 import { ReducerAction } from "../context/CartProvider"
 import { ReducerActionType } from "../context/CartProvider"
@@ -70,8 +70,27 @@ const CartLineItem = ({ item, dispatch, REDUCER_ACTIONS}:PropsType) => {
 
         </li>
     )
-    
+
     return content
 }
 
-export default CartLineItem
+//OPTIMIZING CART LINE ITEMS WITH MEMO 
+
+//need fx to see if values are equal in both objects
+// MemoizedCartLineItem is equal to CartLineItem because we pass in an object
+function areItemsEqual({ item: prevItem}: PropsType, {item: nextItem }:PropsType) {
+    return Object.keys(prevItem).every(key => {
+        //using an assertion here
+        return prevItem[key as keyof CartItemType] === nextItem[key as keyof CartItemType]
+    })
+}
+const MemoizedCartLineItem = memo<typeof CartLineItem>(CartLineItem, areItemsEqual)
+//Above ensures that there is no re-render unless the cart line items changes. if qty of 1 lineitem changes the others should not change.
+
+// NTS: can be more explicit with the key type and return type.
+// const getKeys = Object.keys as <T extends object>(obj: T) => Array<keyof T>
+// function areItemsEqual({ item: prevItem }: PropsType, { item: nextItem }: PropsType) {
+//     return getKeys<CartItemType>(prevItem).every(key => prevItem[key] === nextItem[key]);
+// }
+
+export default MemoizedCartLineItem

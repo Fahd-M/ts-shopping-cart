@@ -1,6 +1,6 @@
 import { ProductType } from "../context/ProductsProvider";
 import { ReducerActionType, ReducerAction } from "../context/CartProvider"
-import { ReactElement } from "react";
+import { ReactElement, memo } from "react";
 
 
 type PropsType = {
@@ -33,4 +33,21 @@ const Product = ({ product, dispatch, REDUCER_ACTIONS, inCart}:PropsType): React
     return content
 }
 
-export default Product
+//OPTIMIZING PRODUCTS WITH MEMO 
+
+//create comparison fx 
+function areProductsEqual({ product: prevProduct, inCart: prevInCart }: PropsType, { product: nextProduct, inCart: nextInCart }:PropsType) {
+    return (
+        Object.keys(prevProduct).every(key => {
+            return prevProduct[key as keyof ProductType] === nextProduct[key as keyof ProductType]
+        }) && prevInCart === nextInCart
+    )
+} 
+// Note: See assertions notes and index signatures notes from TS documentation
+
+const MemoizedProduct = memo<typeof Product>(Product,  areProductsEqual)
+// Above will ensure that a re-render will only take place for a single product that is being affected, not all products
+
+
+
+export default MemoizedProduct
